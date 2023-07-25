@@ -10,21 +10,22 @@ import SwiftUI
 struct CartView: View {
     @StateObject var viewModel: CartViewModel
     @EnvironmentObject var contentVM: ContentViewModel
-    
+    @State var showAlert = false
+    @State var alertMessage = ""
     var body: some View {
         VStack{
             Text("Корзина")
                 .font(.title).bold()
             List {
-                ForEach(viewModel.position) { item in
-                    HStack{
-                        Text(item.item.title)
-                        Text(item.milk ?? "")
-                        Text(item.sirop ?? "")
-                        Text("\(item.count) шт")
-                        Text(String(format: "%.2f", (item.price)))
-                        Text("руб.")
-                    }
+                ForEach(0 ..< viewModel.position.count, id: \.self) { index in
+                    PositionCell(position: viewModel.position[index])
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button {
+                                viewModel.position.remove(at: index)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                        }
                 }
             }.listStyle(.plain)
             VStack{
@@ -36,28 +37,33 @@ struct CartView: View {
                 }.font(.title).bold()
                 HStack{
                     Spacer()
-                    Button("Подтвердить") {
+                    ButtonExt(action: {
+                        guard !viewModel.position.isEmpty else {
+                            showAlert.toggle()
+                            alertMessage = Errors.emptyChart.rawValue
+                            return
+                        }
                         Task{
-                            print("жмяк")
                             guard let user = contentVM.currentUser else { return }
+                            guard !(user.adress == nil || user.phone == nil) else {
+                                showAlert.toggle()
+                                alertMessage = Errors.adressError.rawValue
+                                return
+                            }
                             var order = OrderModel(userID: user.id,
                                                    date: Date(),
                                                    status: OrderStatus.created.rawValue)
                             order.positions = viewModel.position
-                            print("Сами позиции \(viewModel.position)")
-                            print("проверка")
-                            print("Позиции в ордере \(order.positions)")
                             try await FireStoreService.shared.addOrder(order: order)
                             viewModel.position.removeAll()
                         }
-                    }.frame(maxWidth: 150, maxHeight: 20)
-                        .padding(.horizontal, 8)
-                        .background(.black)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .shadow(color: .black, radius: 1, x: 0, y: 0)
+                    }, text: "Подтвердить", width: 200)
                 }.padding(.horizontal, 5)
             }
+        } .alert(isPresented: $showAlert) {
+            Alert(title: Text("Ошибка!"),
+                  message: Text(alertMessage),
+                  dismissButton: .default(Text("OK")))
         }
     }
 }

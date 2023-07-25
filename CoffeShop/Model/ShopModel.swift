@@ -8,13 +8,13 @@
 import Foundation
 import FirebaseFirestore
 
-struct CoffeShopModel: Identifiable {
+struct ShopModel: Identifiable {
     var id: String = UUID().uuidString
     var name: String
     var adress: String
 }
 
-extension CoffeShopModel {
+extension ShopModel {
     init?(qdSnap: QueryDocumentSnapshot) {
         let data = qdSnap.data()
         guard let id = data["id"] as? String,
@@ -27,7 +27,7 @@ extension CoffeShopModel {
     }
 }
 
-    extension CoffeShopModel {
+    extension ShopModel {
         var representation: [String: Any] {
         var repres = [String: Any]()
         repres["id"] = id

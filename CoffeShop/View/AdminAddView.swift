@@ -10,8 +10,8 @@ import PhotosUI
 
 struct AdminAddView: View {
     @State var tgl = false
-    var menu: MenuModel?
-    var cafe: CoffeShopModel?
+    var menu: ProductModel?
+    var cafe: ShopModel?
     @StateObject var viewModel = AdminAddViewModel()
     @State var viewType: Bool
 
@@ -30,10 +30,15 @@ struct AdminAddView: View {
                         .cornerRadius(20)
                 }
             VStack(spacing: 10){
-                TextFieldExt(text: menu?.title ?? cafe?.name ?? "Название", bind: $viewModel.title, secure: false)
-                TextFieldExt(text: menu?.description ?? cafe?.adress ?? "Описание", bind: $viewModel.description, secure: false)
+                Text("Название")
+                TextFieldExt(text: menu?.title ?? cafe?.name ?? "", bind: $viewModel.title, secure: false)
+                Text("Описание")
+                TextFieldExt(text: menu?.description ?? cafe?.adress ?? "", bind: $viewModel.description, secure: false)
                 if viewType{
-                    TextFieldExt(text: String(menu?.price ?? 0) ?? "Цена", bind: $viewModel.price, secure: false)
+                    Text("Цена")
+                    if let price = menu?.price{
+                        TextFieldExt(text: String(price), bind: $viewModel.price, secure: false)
+                    }
                     Picker("", selection: $viewModel.category) {
                         ForEach(Categories.allCases, id: \.id) { status in
                             Text(status.rawValue).tag(status)
@@ -45,15 +50,17 @@ struct AdminAddView: View {
             }
             ButtonExt(action: {
                 if viewType {
-                    viewModel.product = MenuModel(id: menu?.id ??  viewModel.id,
-                                            title: viewModel.title,
-                                            price: (Double(viewModel.price) ?? 0.0),
-                                            description: viewModel.description,
-                                            category: viewModel.category,
-                                            season: viewModel.season,
-                                            new: viewModel.new)
+                    if let price = Double(viewModel.price){
+                        viewModel.product = ProductModel(id: menu?.id ??  viewModel.id,
+                                                      title: viewModel.title,
+                                                      price: price,
+                                                      description: viewModel.description,
+                                                      category: viewModel.category,
+                                                      season: viewModel.season,
+                                                      new: viewModel.new)
+                    }
                 } else {
-                    viewModel.coffeShop = CoffeShopModel(id: cafe?.id ?? viewModel.id, name: viewModel.title, adress: viewModel.description)
+                    viewModel.coffeShop = ShopModel(id: cafe?.id ?? viewModel.id, name: viewModel.title, adress: viewModel.description)
                 }
                 Task{
                     guard let imageData = viewModel.selectedImage.jpegData(compressionQuality: 0.3) else { return }
@@ -64,13 +71,13 @@ struct AdminAddView: View {
             }, text: "Сохранить")
             .bold()
             if let caffeShop = cafe{
-            Button("Удалить") {
-                Task{
-                    try await FireStoreService.shared.removeItemorShop(
-                            id: caffeShop.id,
-                            reference: FireStoreService.shared.coffeShopRef)
-                    }
-                }
+                ButtonExt(action: {
+                    Task{
+                        try await FireStoreService.shared.removeItemorShop(
+                                id: caffeShop.id,
+                                reference: FireStoreService.shared.coffeShopRef)
+                        }
+                }, text: "Удалить")
             }
             Spacer()
         }.frame(maxWidth: .infinity, maxHeight: .infinity)

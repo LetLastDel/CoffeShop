@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct MenuCell: View {
-    var menu: MenuModel
+    var menu: ProductModel
     @State var menuImage: UIImage?
     var width: CGFloat = 200
     var height: CGFloat = 200

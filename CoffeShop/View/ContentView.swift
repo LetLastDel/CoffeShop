@@ -11,8 +11,8 @@ struct ContentView: View {
     @StateObject var viewModel = ContentViewModel()
     
     var body: some View {
-        if !viewModel.progress{
-            ProgressView()
+        if viewModel.progress{
+            ProgresCustomView()
         }
        else if (viewModel.currentUser != nil) {
             TabBarView()

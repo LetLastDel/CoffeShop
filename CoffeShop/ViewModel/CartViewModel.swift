@@ -20,9 +20,7 @@ class CartViewModel: ObservableObject {
         return Double(ttl)
     }
     func addOrder(order: PositionModel) {
-        print("Сработало добавление")
         self.position.append(order)
-        print(position)
     }
     
     

@@ -10,14 +10,16 @@ import UIKit
 
 class MainViewModel: ObservableObject {
     
-    @Published var coffeShops: [CoffeShopModel] = []
-    @Published var menu: [MenuModel] = []
-    @Published var selectedCafe: CoffeShopModel?
-    var sorted: [MenuModel] {
+    @Published var coffeShops: [ShopModel] = []
+    @Published var menu: [ProductModel] = []
+    @Published var selectedCafe: ShopModel?
+    var sorted: [ProductModel] {
         menu.filter { MenuModel in
             MenuModel.new
         }
     }
+
+
 
     init() {
         Task{

@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestore
 
-struct MenuModel: Identifiable {
+struct ProductModel: Identifiable {
     var id: String = UUID().uuidString
     var title: String
     var price: Double
@@ -18,7 +18,7 @@ struct MenuModel: Identifiable {
     var new: Bool
 }
 
-extension MenuModel {
+extension ProductModel {
     init?(qdSnap: QueryDocumentSnapshot) {
         let data = qdSnap.data()
         guard let id = data["id"] as? String,
@@ -38,7 +38,7 @@ extension MenuModel {
     }
 }
 
-extension MenuModel {
+extension ProductModel {
     var representation: [String: Any] {
         var repres = [String: Any]()
         repres["id"] = id

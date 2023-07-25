@@ -1,0 +1,3 @@
+Pet project with practical use of FireBase.
+The user can create and send orders to the backend.
+From the admin side, the ability to change order statuses, change menus and stores.

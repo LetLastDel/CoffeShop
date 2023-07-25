@@ -15,29 +15,36 @@ class AuthService {
     var currentUser: User? { auth.currentUser }
     
     func singIn(email: String, password: String) async throws -> ProfileModel {
-        let result = try await auth.signIn(withEmail: email, password: password)
-        let profile = try await FireStoreService.shared.getProfile(by: result.user.uid)
-        return profile
-    }
+        do{
+            let result = try await auth.signIn(withEmail: email, password: password)
+            let profile = try await FireStoreService.shared.getProfile(by: result.user.uid)
+            return profile
+        } catch {
+            throw Errors.singInError
+            }
+        }
+  
     
     func singUp(email: String, password: String) async throws -> ProfileModel {
         let result = try await auth.createUser(withEmail: email, password: password)
         let user = result.user
-        
-        let profile = ProfileModel(id: user.uid,
-                                  name: "Не указана",
-                                  email: user.email!,
-                                  phone: 0,
-                                  adress: "Не указан",
-                                  admin: false)
-        do{
-            try await FireStoreService.shared.createProfile(profile: profile)
-            return profile
-        } catch {
-            throw error
+        guard let userEmail = user.email else {
+            throw Errors.singUpError
         }
+        let profile = ProfileModel(id: user.uid,
+                                  name: "Новый пользователь",
+                                  email: userEmail,
+                                  phone: nil,
+                                  adress: nil,
+                                  admin: false)
+        do {
+            try await FireStoreService.shared.createProfile(profile: profile)
+        } catch {
+            throw Errors.singUpError
+        }
+        return profile
     }
-    
+
     func singOut(){
         try! auth.signOut()
     }

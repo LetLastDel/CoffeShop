@@ -11,6 +11,8 @@ struct AuthView: View {
     @StateObject var viewModel: AuthViewModel
     @State var isAuth = true
     @EnvironmentObject var contentVM: ContentViewModel
+    @State var showAlert = false
+    @State var alertMessage: String = ""
     
     var body: some View {
         VStack{
@@ -23,21 +25,40 @@ struct AuthView: View {
                         .frame(maxHeight: 100)
                 }
                 VStack(spacing: 20){
-                    Text(isAuth ? "Authorization" : "Registrarion")
-                TextFieldExt(text: "Insert email", bind: $viewModel.email, secure: false)
-                TextFieldExt(text: "Insert password", bind: $viewModel.password, secure: true)
+                    Text(isAuth ? "Авторизация" : "Регистрация")
+                TextFieldExt(text: "Введите е-маил", bind: $viewModel.email, secure: false)
+                TextFieldExt(text: "Введите пароль", bind: $viewModel.password, secure: true)
                     if !isAuth{
-                        TextFieldExt(text: "Confirm password", bind: $viewModel.repeatPass, secure: true)
+                        TextFieldExt(text: "Повторите пароль", bind: $viewModel.repeatPass, secure: true)
                     }
-                    Button(isAuth ? "Enter" : "Create account") {
-                        isAuth ? viewModel.singIn() : viewModel.singUp()
+                    ButtonExt(action: {
+                        Task{
+                            do{
+                                 isAuth ? try await viewModel.singIn() : try await viewModel.singUp()
+                            } catch Errors.emptyLogin {
+                                showAlert.toggle()
+                                alertMessage = Errors.emptyLogin.rawValue
+                            } catch Errors.shortPass {
+                                showAlert.toggle()
+                                alertMessage = Errors.shortPass.rawValue
+                            } catch Errors.passNotConfirm {
+                                showAlert.toggle()
+                                alertMessage = Errors.passNotConfirm.rawValue
+                            } catch Errors.singInError {
+                                showAlert.toggle()
+                                alertMessage = Errors.singInError.rawValue
+                            } catch Errors.singUpError {
+                                showAlert.toggle()
+                                alertMessage = Errors.singUpError.rawValue
+                            }
+                        }
+                    }, text: isAuth ? "Вход" : "Регистарция", width: .infinity)
+                    .alert(isPresented: $showAlert) {
+                        Alert(title: Text("Ошибка!"),
+                              message: Text(alertMessage),
+                              dismissButton: .default(Text("OK")))
                     }
-                    .frame(maxWidth: .infinity, maxHeight: 30)
-                    .foregroundColor(.black)
-                    .background(.white)
-                    .cornerRadius(20)
-                    .shadow(color: .black, radius: 1, x: 0, y: 0)
-                    Button(isAuth ? "Create account" : "I have an account"){
+                    Button(isAuth ? "Создать акаунт" : "Уже есть аккаунт"){
                         withAnimation {
                             isAuth.toggle()
                         }

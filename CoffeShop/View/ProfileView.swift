@@ -27,20 +27,20 @@ struct ProfileView: View {
 
                         Spacer()
                         VStack{
-                            TextExt(change: false, text: contentVM.currentUser?.name ?? "Guest", newText: $viewModel.newName, action: viewModel.changeUser)
+                            TextExt(change: false, text: contentVM.currentUser?.name ?? "Не указан", newText: $viewModel.newName, action: viewModel.changeUser)
                             Text(contentVM.currentUser?.email ?? "Empty")
                                 .frame(maxWidth: 300, maxHeight: 20)
                                 .padding(.horizontal, 8)
                                 .background(.white)
                                 .cornerRadius(10)
                                 .shadow(color: .black, radius: 1, x: 0, y: 0)
-                            TextExt(change: false, text: contentVM.currentUser?.adress ?? "Empty", newText: $viewModel.newAdress, action: viewModel.changeUser)
-                            TextExt(change: false, text: String(contentVM.currentUser?.phone ?? 0), newText: $viewModel.newPhone, action: viewModel.changeUser)
+                            TextExt(change: false, text: contentVM.currentUser?.adress ?? "Не указан", newText: $viewModel.newAdress, action: viewModel.changeUser)
+                            TextExt(change: false, text: contentVM.currentUser?.phone?.description ?? "Не указан", newText: $viewModel.newPhone, action: viewModel.changeUser)
                         }
                     }.padding()
                 }
                 VStack{
-                    Text("Favorite:")
+                    Text("Избранное:")
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 1) {
                             ForEach(viewModel.favorite, id: \.id) { menu in
@@ -52,41 +52,32 @@ struct ProfileView: View {
                                     MenuCell(menu: menu, width: 100)
                                 }
                             }
-                        }
-                        .frame(maxHeight: 100)
+                        } .frame(maxHeight: viewModel.favorite.isEmpty ? 0 : 100)
                     }
                 }
                 VStack{
-                    Text("History of orders:")
+                    Text("История заказов:")
                     List{
-                        ForEach(viewModel.orders) { order in
+                        ForEach(viewModel.orders.sorted(by: { $0.date > $1.date })) { order in
                             OrderCell(order: order)
                         }
                     }.listStyle(.plain)
                 }
             }
-            Button("Sign out") {
-                showAlert.toggle()
-                AuthService.shared.singOut()
-                contentVM.currentUser = nil
-            }.foregroundColor(.black)
-            //TODO: подтверждение
-//                .confirmationDialog("", isPresented: $showAlert, actions: {
-//                    AuthService.shared.singOut()
-//                    contentVM.currentUser = nil
-//                }, message: {
-//                    Text("edsf")
-//                })
-        }.frame(maxWidth: .infinity, maxHeight: .infinity)
-
-        .onAppear {
-            viewModel.user = contentVM.currentUser
-            Task{
-                try await viewModel.getFavorite()
+            ButtonExt(action: { showAlert.toggle() }, text: "Выйти")
+                .confirmationDialog("", isPresented: $showAlert) {
+                    Button("Подвтердить"){
+                        AuthService.shared.singOut()
+                        contentVM.currentUser = nil
+                    }
+                } message: {
+                    Text("Вы уверены что хотите выйти?")
                 }
-            Task{
-                try await viewModel.getOrders()
-            }
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onAppear {
+                viewModel.user = contentVM.currentUser
+                Task{ try await viewModel.getFavorite() }
+                Task{ try await viewModel.getOrders() }
             }
         .onChange(of: viewModel.check, perform: { newValue in
             Task{
@@ -96,8 +87,3 @@ struct ProfileView: View {
     }
 }
 
-//struct Profile_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ProfileView()
-//    }
-//}

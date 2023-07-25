@@ -15,8 +15,15 @@ enum OrderStatus: String, CaseIterable{
     case ready = "Готов!"
     case widraw = "Выдан"
     
+    
+    static var allCases: [OrderStatus] {
+        return [.created, .canceled, .recieved, .preparing, .ready, .widraw]
+    }
+    static func fromStringValue(_ stringValue: String) -> OrderStatus? {
+        return allCases.first { $0.rawValue == stringValue }
+        
+    }
 }
-
 extension OrderStatus: Identifiable {
     var id: String { self.rawValue }
 

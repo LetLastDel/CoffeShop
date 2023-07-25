@@ -16,7 +16,6 @@ class ItemViewModel: ObservableObject {
     @Published var selectedMilk = 0
     @Published var sirop = ["Ваниль", "Шоколад", "Карамель", "Малиновый"]
     @Published var selectedSirop = 0
-    @Published var image = UIImage(named: "photo")
     
     func getPrice(selectedSize: Int, milk: Int) -> Double {
         var sizeCoef = 1.0
@@ -43,22 +42,9 @@ class ItemViewModel: ObservableObject {
         if itemCount > 1{
             itemCount -= 1}
     }
-    func addFavorite(_ manu: MenuModel, to user: ProfileModel) async{
+    func addFavorite(_ menu: ProductModel, to user: ProfileModel) async{
         Task{
-            try await FireStoreService.shared.addFavorite(manu, to: user)
+            try await FireStoreService.shared.addFavorite(menu, to: user)
         }
-    }
-    func showImages(url: String){
-        Task{
-            do{
-                let photo = try await NetworkService.shared.downloadImage(url: url)
-                DispatchQueue.main.async {
-                    self.image = photo
-                }
-            } catch {
-                throw error
-            }
-        }
-        
     }
 }

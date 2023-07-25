@@ -15,54 +15,40 @@ struct MainView: View {
     var gridItem: [GridItem] = [GridItem(.flexible()), GridItem(.flexible())]
     
     var body: some View {
-        if let profile = contentVM.currentUser {
-            ScrollView{
-                VStack{
-                    Text("Добро пожаловать, \(contentVM.currentUser?.name ?? "гость")")
-                        .font(.headline)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(viewModel.coffeShops, id: \.id) { cof in
-                                CafesCell(cafe: cof)
-                                    .onTapGesture {
-                                        if profile.admin{
-                                            viewModel.selectedCafe = cof
-                                        }
-                                    }
-                            }
-                        }
-                    }
-                    .sheet(item: $viewModel.selectedCafe, content: { selectedCafe in
-                        AdminAddView(cafe: selectedCafe, viewType: false)
-                    })
-                    .frame(maxHeight: 200)
-                    HStack{
-                        Text(showMenu ? "Меню" : "Новинки")
-                        Spacer()
-                        ButtonExt(action: {
-                            withAnimation(.easeIn(duration: 0.8)) {
-                                showMenu.toggle()
-                            }
-                        }, text: "Показать все", width: 130)
-                    }
+            if let profile = contentVM.currentUser {
+                ScrollView{
                     VStack{
-                        if showMenu{
-                            LazyVGrid(columns: gridItem, alignment: .center, spacing: 0) {
-                                ForEach(viewModel.menu, id: \.id) { menu in
-                                    NavigationLink {
-                                        ItemView(item: menu)
-                                            .environmentObject(viewModel)
-                                            .environmentObject(contentVM)
-                                    } label: {
-                                        MenuCell(menu: menu)
-                                    }
-                                }.padding(.bottom, 8)
+                        Text("Добро пожаловать, \(contentVM.currentUser?.name ?? "гость")")
+                            .font(.headline)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(viewModel.coffeShops, id: \.id) { cof in
+                                    CafesCell(cafe: cof)
+                                        .onTapGesture {
+                                            if profile.admin{
+                                                viewModel.selectedCafe = cof
+                                            }
+                                        }
+                                }
                             }
                         }
-                        if !showMenu{
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 8) {
-                                    ForEach(viewModel.sorted, id: \.id) { menu in
+                        .sheet(item: $viewModel.selectedCafe, content: { selectedCafe in
+                            AdminAddView(cafe: selectedCafe, viewType: false)
+                        })
+                        .frame(maxHeight: 200)
+                        HStack{
+                            Text(showMenu ? "Меню" : "Новинки")
+                            Spacer()
+                            ButtonExtWthTgl(action: {
+                                withAnimation(.easeIn(duration: 0.8)) {
+                                    showMenu.toggle()
+                                }
+                            }, text: "Показать все", width: 130)
+                        }
+                        VStack{
+                            if showMenu{
+                                LazyVGrid(columns: gridItem, alignment: .center, spacing: 0) {
+                                    ForEach(viewModel.menu, id: \.id) { menu in
                                         NavigationLink {
                                             ItemView(item: menu)
                                                 .environmentObject(viewModel)
@@ -70,14 +56,28 @@ struct MainView: View {
                                         } label: {
                                             MenuCell(menu: menu)
                                         }
+                                    }.padding(.bottom, 8)
+                                }
+                            }
+                            if !showMenu{
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 8) {
+                                        ForEach(viewModel.sorted, id: \.id) { menu in
+                                            NavigationLink {
+                                                ItemView(item: menu)
+                                                    .environmentObject(viewModel)
+                                                    .environmentObject(contentVM)
+                                            } label: {
+                                                MenuCell(menu: menu)
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                }.padding(.horizontal, 2)
-                    .background(.white)
+                    }.padding(.horizontal, 2)
+                        .background(.white)
+                }
             }
         }
     }
-}

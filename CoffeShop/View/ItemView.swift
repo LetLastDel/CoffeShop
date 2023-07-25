@@ -9,12 +9,14 @@ import SwiftUI
 
 struct ItemView: View {
     @StateObject var viewModel = ItemViewModel()
-    var item : MenuModel
+    var item : ProductModel
     var profile: ProfileModel?
     @EnvironmentObject var vm: MainViewModel
     @EnvironmentObject var contentVM: ContentViewModel
     @State var price: Double = 0
     @State var change = false
+    @Environment(\.presentationMode) var presentationMode
+
     
     var body: some View {
         VStack{
@@ -28,7 +30,9 @@ struct ItemView: View {
                                 Spacer()
                                 Button {
                                     Task{
-                                        await (profile != nil) ?  try FireStoreService.shared.removeFavorite(userID: profile!.id, menu: item)  : viewModel.addFavorite(item, to: contentVM.currentUser!)
+                                        await (profile != nil) ?
+                                        try FireStoreService.shared.removeFavorite(userID: profile!.id, menu: item)  :
+                                        viewModel.addFavorite(item, to: contentVM.currentUser!)
                                     }
                                 } label: {
                                     Image(systemName: "star.fill")
@@ -36,7 +40,8 @@ struct ItemView: View {
                                 }
                             }
                             HStack{
-                                Text("\(item.price) руб")
+                                Text(String(format: "%.2f",(item.price)))
+                                Text("руб")
                                 Spacer()
                                 HStack{
                                     Stepper("\(viewModel.itemCount)") {
@@ -104,9 +109,22 @@ struct ItemView: View {
                         Spacer()
                         Button("В корзину!") {
                             let price = (item.price * Double(viewModel.itemCount) * viewModel.getPrice(selectedSize: viewModel.selectedSize, milk: viewModel.selectedMilk))
-                            let order = PositionModel(item: MenuModel(title: item.title, price: item.price, description: "", category: item.category, season: item.season, new: item.new), title: item.title, count: viewModel.itemCount, sirop: viewModel.sirop[viewModel.selectedSirop], milk: viewModel.milk[viewModel.selectedMilk], price: price, size: viewModel.size[viewModel.selectedSize])
+                            let order = PositionModel(item: ProductModel(title: item.title,
+                                                                      price: item.price,
+                                                                      description: "",
+                                                                      category: item.category,
+                                                                      season: item.season,
+                                                                      new: item.new),
+                                                      title: item.title,
+                                                      count: viewModel.itemCount,
+                                                      sirop: viewModel.sirop[viewModel.selectedSirop],
+                                                      milk: viewModel.milk[viewModel.selectedMilk],
+                                                      price: price,
+                                                      size: viewModel.size[viewModel.selectedSize])
                             CartViewModel.shared.addOrder(order: order)
-                            print("Добавляю в корзину \(order)")
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                    presentationMode.wrappedValue.dismiss()
+                                }
                         }
                         .frame(width: 100, height: 40)
                         .foregroundColor(.black)

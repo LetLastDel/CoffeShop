@@ -11,10 +11,13 @@ import Foundation
 class ProfileViewModel: ObservableObject {
     var user: ProfileModel?
     @Published var check = false
-    @Published var favorite: [MenuModel] = []
+    @Published var favorite: [ProductModel] = []
     @Published var orders: [OrderModel] = []
-    @Published var sadsad = false
-    
+    var sorted: [OrderModel]  {
+        orders.sorted { OrderModel, OrderModel in
+            OrderModel.date > OrderModel.date
+        }
+    }    
     @Published var newName = ""
     @Published var newPhone = ""
     @Published var newAdress = ""

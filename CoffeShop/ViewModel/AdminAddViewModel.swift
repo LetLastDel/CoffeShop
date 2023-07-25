@@ -25,8 +25,8 @@ class AdminAddViewModel: ObservableObject {
     @Published var new: Bool = false
     @Published var imgUrl = ""
     @Published var imageData: Data?
-    @Published var product: MenuModel?
-    @Published var coffeShop: CoffeShopModel?
+    @Published var product: ProductModel?
+    @Published var coffeShop: ShopModel?
     
     private func setImage(from selection: PhotosPickerItem?) {
         guard let selection else { return }

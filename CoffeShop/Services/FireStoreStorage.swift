@@ -21,10 +21,11 @@ class FireStoreStorage {
         storage.child("CoffeShop")
     }
     func addImage(image: Data, productID: String, reference: StorageReference) async throws {
-        let metadata = StorageMetadata()
-        metadata.contentType = "image/jpg"
+            let metadata = StorageMetadata()
+            metadata.contentType = "image/jpg"
             reference.child(productID).putData(image, metadata: metadata)
-        }
+    }
+    
     func getImage(productID: String,reference: StorageReference, completion: @escaping (Result<Data, Error>) -> ()){
         reference.child(productID).getData(maxSize: 2 * 1024 * 1024) { data, error in
             guard let data = data else {

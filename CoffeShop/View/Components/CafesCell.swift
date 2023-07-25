@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CafesCell: View {
-    var cafe: CoffeShopModel
+    var cafe: ShopModel
     @State var coffeShopsImage: UIImage?
 
     var body: some View {

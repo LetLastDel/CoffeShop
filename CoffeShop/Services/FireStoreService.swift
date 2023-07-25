@@ -33,7 +33,7 @@ class FireStoreService {
         do{
             try await profilesRef.document(profile.id).setData(profile.representation)
         } catch {
-            print("Не записалось \(error.localizedDescription)")
+            throw Errors.singUpError
         }
     }
     func getProfile(by userID: String) async throws -> ProfileModel {
@@ -64,7 +64,6 @@ class FireStoreService {
     }
     func addOrder(order: OrderModel) async throws {
         try await ordersRef.document(order.id).setData(order.representation)
-        print("Ордер пошел")
             try await addPosition(order.positions, to: order.id)
     }
     func getOrders(by userID: String?) async throws -> [OrderModel] {
@@ -73,14 +72,13 @@ class FireStoreService {
         let docs = snapShot.documents
         for doc in docs {
             if let userID{
-                if let order = OrderModel(qdSnap: doc ), order.userID == userID
-                { orderList.append(order)
-                    print("Пошло через юзера")
-                    print("Добавлено \(orderList.count)")
+                if let order = OrderModel(qdSnap: doc ), order.userID == userID {
+                    orderList.append(order)
                 }
             }else {
-                if let order = OrderModel(qdSnap: doc )  { orderList.append(order) }
-                print("Пошло общее")
+                if let order = OrderModel(qdSnap: doc )  {
+                    orderList.append(order)
+                }
             }
         }
         return orderList
@@ -95,58 +93,54 @@ class FireStoreService {
         return positionList
     }
     
-    func addFavorite(_ menu: MenuModel, to profile: ProfileModel) async throws -> MenuModel {
+    func addFavorite(_ menu: ProductModel, to profile: ProfileModel) async throws -> ProductModel {
         try await profilesRef.document(profile.id).collection("menu").document(menu.id).setData(menu.representation)
         return menu
     }
-    func getFavorite(userID: String) async throws -> [MenuModel] {
+    func getFavorite(userID: String) async throws -> [ProductModel] {
         let snapShot = try await profilesRef.document(userID).collection("menu").getDocuments()
         let docs = snapShot.documents
-        var menuList = [MenuModel]()
+        var menuList = [ProductModel]()
         for doc in docs {
-            if let menu = MenuModel(qdSnap: doc) { menuList.append(menu) }
+            if let menu = ProductModel(qdSnap: doc) { menuList.append(menu) }
         }
         return menuList
     }
-    func removeFavorite(userID: String, menu: MenuModel) async throws {
+    func removeFavorite(userID: String, menu: ProductModel) async throws {
         try await profilesRef.document(userID).collection("menu").document(menu.id).delete()
-        print("delete")
     }
-    func addProduct(product: MenuModel, photo: Data) async throws {
+    func addProduct(product: ProductModel, photo: Data) async throws {
         do{
             try await FireStoreStorage.shared.addImage(image: photo, productID: product.id, reference: FireStoreStorage.shared.productsRef)
             try await menuRef.document(product.id).setData(product.representation)
-
         } catch {
-            print("Картинка не ушла")
+            throw Errors.productAddError
         }
-            print("uploaded")
     }
-    func addCafes(coffeShop: CoffeShopModel, photo: Data) async throws {
+    func addCafes(coffeShop: ShopModel, photo: Data) async throws {
         do{
             try await FireStoreStorage.shared.addImage(image: photo, productID: coffeShop.id, reference: FireStoreStorage.shared.caffesRef)
             try await coffeShopRef.document(coffeShop.id).setData(coffeShop.representation)
         } catch {
-            print("Картинка не ушла")
+            throw Errors.coffeShopAddError
         }
-            print("uploaded")
-        }
-    func getMenu() async throws -> [MenuModel] {
+    }
+    func getMenu() async throws -> [ProductModel] {
         let snapShot = try await menuRef.getDocuments()
         let docs = snapShot.documents
-        var menuList = [MenuModel]()
+        var menuList = [ProductModel]()
         for doc in docs {
-            if let menu = MenuModel(qdSnap: doc) { menuList.append(menu) }
+            if let menu = ProductModel(qdSnap: doc) { menuList.append(menu) }
         }
         return menuList
     }
 
-    func getShop() async throws -> [CoffeShopModel] {
+    func getShop() async throws -> [ShopModel] {
         let snapShot = try await coffeShopRef.getDocuments()
         let docs = snapShot.documents
-        var shopList = [CoffeShopModel]()
+        var shopList = [ShopModel]()
         for doc in docs {
-            if let cshop = CoffeShopModel(qdSnap: doc) { shopList.append(cshop) }
+            if let cshop = ShopModel(qdSnap: doc) { shopList.append(cshop) }
         }
         return shopList
     }

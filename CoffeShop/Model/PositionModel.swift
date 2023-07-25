@@ -10,7 +10,7 @@ import FirebaseFirestore
 struct PositionModel: Identifiable {
     
     var id: String = UUID().uuidString
-    var item: MenuModel
+    var item: ProductModel
     var title: String
     var count: Int
     var sirop: String?
@@ -42,7 +42,7 @@ extension PositionModel{
         let milk = data["milk"] as? String,
         let price = data["price"] as? Double,
         let size = data["size"] as? String else { return nil }
-        let item: MenuModel = MenuModel(title: title, price: price, description: "", category: .cake, season: false, new: false)
+        let item: ProductModel = ProductModel(title: title, price: price, description: "", category: .cake, season: false, new: false)
 
         self.id = id
         self.title = title

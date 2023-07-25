@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ButtonExt: View {
+struct ButtonExtWthTgl: View {
     var action: () -> Void
     var text: String
     var width: CGFloat = 100
@@ -25,9 +25,20 @@ struct ButtonExt: View {
         .shadow(color: .black, radius: 1, x: 0, y: 0)
     }
 }
+struct ButtonExt: View {
+    var action: () -> Void
+    var text: String
+    var width: CGFloat = 100
+    var body: some View {
+        Button(text){
+            action()
+        }
+        .frame(maxWidth: width, maxHeight: 20)
+        .padding(.horizontal, 8)
+        .background(.white)
+        .foregroundColor(.black)
+        .cornerRadius(10)
+        .shadow(color: .black, radius: 1, x: 0, y: 0)
+    }
+}
 
-//struct ButtonExt_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ButtonExt()
-//    }
-//}

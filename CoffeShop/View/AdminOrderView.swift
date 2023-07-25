@@ -15,7 +15,7 @@ struct AdminOrderView: View {
     var body: some View {
         VStack{
             List{
-                ForEach(viewModel.orders) { order in
+                ForEach(viewModel.orders.sorted(by: { $0.date > $1.date })) { order in
                     OrderCell(order: order, admin: true)
                         .environmentObject(contentVM)
                 }

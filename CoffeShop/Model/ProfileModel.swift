@@ -11,8 +11,8 @@ struct ProfileModel: Identifiable {
     var id: String = UUID().uuidString
     var name: String
     var email: String
-    var phone: Int
-    var adress: String
+    var phone: Int?
+    var adress: String?
     var admin: Bool
 }
 
